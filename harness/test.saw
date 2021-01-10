@@ -1,0 +1,17 @@
+enable_experimental;
+
+m <- llvm_load_module "test.bc";
+
+let {{ unmatched = zero : [64] }};
+
+let test_spec = do {
+  crucible_execute_func [];
+  crucible_return (crucible_term {{ unmatched : [64] }});
+};
+
+let tactic = do {
+  goal_eval_unint ["unmatched"];
+  w4_unint_z3 ["unmatched"];
+};
+
+crucible_llvm_verify_x86 m "../build/test" "test" [] false test_spec tactic;
